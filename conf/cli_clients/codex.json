@@ -3,6 +3,7 @@
   "command": "codex",
   "additional_args": [
     "--json",
+    "--skip-git-repo-check",
     "--sandbox",
     "read-only",
     "--enable",
