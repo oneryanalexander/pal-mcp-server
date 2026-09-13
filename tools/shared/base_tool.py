@@ -1507,7 +1507,7 @@ When recommending searches, be specific about what information you need and why 
                 "status": "error",
                 "content": (
                     f"Image support not available: Model '{model_name}' does not support image processing. "
-                    f"Please use a vision-capable model such as 'gemini-2.5-flash', 'o3', "
+                    f"Please use a vision-capable model such as 'gemini-3.6-flash', 'o3', "
                     f"or 'claude-opus-4.1' for image analysis tasks."
                 ),
                 "content_type": "text",

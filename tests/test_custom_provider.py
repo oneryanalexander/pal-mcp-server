@@ -40,7 +40,7 @@ class TestCustomProvider:
         provider = CustomProvider(api_key="test-key", base_url="http://localhost:11434/v1")
 
         # Known model should validate
-        assert provider.validate_model_name("llama3.2")
+        assert provider.validate_model_name("qwen2.5-coder:32b")
 
         # For custom provider, unknown models return False when not in registry
         # This is expected behavior - custom models need to be declared in custom_models.json
@@ -63,7 +63,7 @@ class TestCustomProvider:
                 provider.get_capabilities("o3")
 
             # Test with a custom model from the local registry
-            capabilities = provider.get_capabilities("local-llama")
+            capabilities = provider.get_capabilities("coder")
             assert capabilities.provider == ProviderType.CUSTOM
             assert capabilities.context_window > 0
 
@@ -92,15 +92,15 @@ class TestCustomProvider:
         assert resolved == "meta-llama/llama-3-70b"
 
         # Test local model alias
-        resolved_local = provider._resolve_model_name("local-llama")
-        assert resolved_local == "llama3.2"
+        resolved_local = provider._resolve_model_name("coder")
+        assert resolved_local == "qwen2.5-coder:32b"
 
     def test_no_thinking_mode_support(self):
         """Custom provider generic capabilities default to no thinking mode."""
         provider = CustomProvider(api_key="test-key", base_url="http://localhost:11434/v1")
 
-        # llama3.2 is a known model that should work
-        assert not provider.get_capabilities("llama3.2").supports_extended_thinking
+        # qwen2.5-coder:32b is a known model that should work
+        assert not provider.get_capabilities("qwen2.5-coder:32b").supports_extended_thinking
 
         # Unknown models should raise error
         with pytest.raises(ValueError, match="Unsupported model 'any-model' for provider custom"):

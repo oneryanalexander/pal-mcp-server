@@ -272,8 +272,8 @@ python -m pytest tests/ --cov=. --cov-report=html -m "not integration"
 # 2. Start Ollama service
 ollama serve
 
-# 3. Pull a model (e.g., llama3.2)
-ollama pull llama3.2
+# 3. Pull a model (e.g., qwen2.5-coder:32b)
+ollama pull qwen2.5-coder:32b
 
 # 4. Set environment variable for custom provider
 export CUSTOM_API_URL="http://localhost:11434"
@@ -291,7 +291,7 @@ python -m pytest tests/test_prompt_regression.py::TestPromptIntegration::test_ch
 python -m pytest tests/ -v
 ```
 
-**Note**: Integration tests use the local-llama model via Ollama, which is completely FREE to run unlimited times. Requires `CUSTOM_API_URL` environment variable set to your local Ollama endpoint. They can be run safely in CI/CD but are excluded from code quality checks to keep them fast.
+**Note**: Integration tests use the `coder` model (qwen2.5-coder:32b) via Ollama, which is completely FREE to run unlimited times. Requires `CUSTOM_API_URL` environment variable set to your local Ollama endpoint. They can be run safely in CI/CD but are excluded from code quality checks to keep them fast.
 
 ### Development Workflow
 

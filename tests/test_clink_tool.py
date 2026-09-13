@@ -60,10 +60,14 @@ def test_registry_lists_roles():
     assert "default" in roles
     assert "default" in registry.list_roles("codex")
     codex_client = registry.get_client("codex")
-    # Verify codex uses --enable web_search_request (not --search which is unsupported by exec)
+    # Verify codex uses --enable web_search_request (not --search which is unsupported
+    # by exec), runs read-only rather than bypassing the sandbox, and skips the
+    # git-checkout requirement so it can run outside a repository.
     assert codex_client.config_args == [
         "--json",
-        "--dangerously-bypass-approvals-and-sandbox",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "read-only",
         "--enable",
         "web_search_request",
     ]
