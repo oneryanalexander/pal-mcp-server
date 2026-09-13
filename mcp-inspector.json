@@ -2,13 +2,17 @@
   "mcpServers": {
     "pal": {
       "command": "/Users/macbookprom3max/pal-mcp-server/.pal_venv/bin/python",
-      "args": ["/Users/macbookprom3max/pal-mcp-server/server.py"],
+      "args": [
+        "/Users/macbookprom3max/pal-mcp-server/server.py"
+      ],
       "env": {
         "CUSTOM_API_URL": "http://localhost:11434/v1",
         "CUSTOM_API_KEY": "",
         "CUSTOM_MODEL_NAME": "qwen2.5-coder:32b",
         "DEFAULT_MODEL": "qwen2.5-coder:32b",
-        "LOG_LEVEL": "DEBUG"
+        "LOG_LEVEL": "DEBUG",
+        "OPENAI_ALLOWED_MODELS": "gpt-5.1-codex,gpt-5-mini",
+        "GOOGLE_ALLOWED_MODELS": "pro,flash"
       }
     }
   }

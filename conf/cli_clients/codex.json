@@ -3,7 +3,8 @@
   "command": "codex",
   "additional_args": [
     "--json",
-    "--dangerously-bypass-approvals-and-sandbox",
+    "--sandbox",
+    "read-only",
     "--enable",
     "web_search_request"
   ],

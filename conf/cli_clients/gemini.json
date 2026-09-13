@@ -2,9 +2,12 @@
   "name": "gemini",
   "command": "gemini",
   "additional_args": [
-    "--yolo"
+    "--approval-mode",
+    "plan"
   ],
-  "env": {},
+  "env": {
+    "GEMINI_CLI_TRUST_WORKSPACE": "true"
+  },
   "roles": {
     "default": {
       "prompt_path": "systemprompts/clink/default.txt",
