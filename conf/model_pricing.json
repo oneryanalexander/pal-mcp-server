@@ -1,0 +1,14 @@
+{
+  "_comment": "USD per 1M tokens for standard (non-cached, non-batch) API usage. Keys are canonical model IDs as recorded in metrics. Lookup is exact, falling back to a prefix match only for pinned snapshots (-2026-01-15, -latest). Models absent from this file report cost as unknown (—) rather than $0.00. Local providers (custom/ollama) always count as free.",
+  "_source": "OpenAI standard pricing, https://developers.openai.com/api/docs/pricing?latest-pricing=standard (retrieved 2026-09-13)",
+  "_substitutions": "gpt-5.1-codex is not listed on the source page; it is priced here using the published gpt-5.3-codex rate as a deliberate stand-in. Revisit if OpenAI publishes a gpt-5.1-codex rate.",
+
+  "gpt-5": { "input_per_1m": 1.25, "output_per_1m": 10.00 },
+  "gpt-5-mini": { "input_per_1m": 0.25, "output_per_1m": 2.00 },
+  "gpt-5-nano": { "input_per_1m": 0.05, "output_per_1m": 0.40 },
+  "gpt-5.2": { "input_per_1m": 1.75, "output_per_1m": 14.00 },
+  "gpt-4.1": { "input_per_1m": 2.00, "output_per_1m": 8.00 },
+  "o3-mini": { "input_per_1m": 1.10, "output_per_1m": 4.40 },
+
+  "gpt-5.1-codex": { "input_per_1m": 1.75, "output_per_1m": 14.00 }
+}

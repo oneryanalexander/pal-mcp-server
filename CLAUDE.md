@@ -112,6 +112,58 @@ errors = LogUtils.check_server_logs_for_errors()
 matches = LogUtils.search_logs_for_pattern("TOOL_CALL.*debug")
 ```
 
+### Utilisation Metrics
+
+Every tool call and model completion is recorded to a SQLite database at `logs/metrics.db`,
+so you can see how much the server and the models are actually being used.
+
+```bash
+# Text report (default window: last 7 days)
+python scripts/usage.py
+python scripts/usage.py --last 24h
+python scripts/usage.py --last 30d
+
+# HTML dashboard with charts
+python scripts/usage.py --last 30d --html logs/usage.html
+
+# Raw aggregates for scripting
+python scripts/usage.py --last 7d --json
+```
+
+Reported per window: calls and errors by tool, input/output/total tokens by model and
+provider, latency (avg / p50 / p95), calls by client, tokens per day, and estimated cost.
+
+**Schema** — `calls` (one row per tool call: tool, client, duration, status, error) and
+`model_calls` (one row per model completion: model, provider, token counts, cost). A single
+call may produce several `model_calls` rows, which is how multi-model tools like `consensus`
+are attributed correctly.
+
+**Cost estimation** is driven by `conf/model_pricing.json`, pre-filled with OpenAI standard
+rates for `gpt-5`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5.2`, `gpt-4.1`, `o3-mini` and
+`gpt-5.1-codex`. Note that `gpt-5.1-codex` is not published on OpenAI's pricing page and is
+priced using the `gpt-5.3-codex` rate as a deliberate stand-in — see `_substitutions` in the
+file. Add more as USD per-million-token rates:
+
+```json
+{"gpt-5-mini": {"input_per_1m": 0.25, "output_per_1m": 2.00}}
+```
+
+Local providers (`custom`/`ollama`) always count as free. Models with no pricing entry report
+cost as `—` (unknown) rather than `$0.00`, so an unpriced model is never mistaken for a free one.
+
+Lookup is by exact model ID, falling back to a prefix match **only** for pinned snapshots
+(`-2026-01-15`, `-20260115`, `-latest`). Sibling models are deliberately *not* matched: IDs in a
+family share prefixes but not price tiers, so `gpt-5-codex` never inherits the `gpt-5` rate and
+`gpt-5.2-pro` never inherits `gpt-5.2`. Reporting unknown beats reporting a confident wrong
+number. `tests/test_metrics.py` locks this behaviour in.
+
+**Environment:**
+- `PAL_METRICS_ENABLED=false` — disable recording entirely
+- `PAL_METRICS_DB=/path/to.db` — override the database location
+
+Recording is best-effort and wrapped in exception guards: a metrics failure logs at DEBUG and
+never breaks a tool call.
+
 ### Testing
 
 Simulation tests are available to test the MCP server in a 'live' scenario, using your configured

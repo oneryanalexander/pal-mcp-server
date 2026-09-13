@@ -691,6 +691,24 @@ async def handle_list_tools() -> list[Tool]:
 
 @server.call_tool()
 async def handle_call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
+    """Record utilisation metrics around every tool call.
+
+    Wrapping the whole dispatch (rather than just tool execution) means
+    argument validation and model-resolution failures are recorded as
+    errors too, instead of escaping before tracking starts.
+    """
+    from utils.client_info import get_client_friendly_name
+    from utils.metrics import track_tool_call
+
+    with track_tool_call(
+        name,
+        client=get_client_friendly_name(),
+        continuation=bool(arguments.get("continuation_id")),
+    ):
+        return await _dispatch_tool_call(name, arguments)
+
+
+async def _dispatch_tool_call(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     """
     Handle incoming tool execution requests from MCP clients.
 
