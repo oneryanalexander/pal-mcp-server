@@ -140,9 +140,10 @@ are attributed correctly.
 
 **Cost estimation** is driven by `conf/model_pricing.json`, pre-filled with OpenAI standard
 rates for `gpt-5`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5.2`, `gpt-4.1`, `o3-mini` and
-`gpt-5.1-codex`. Note that `gpt-5.1-codex` is not published on OpenAI's pricing page and is
-priced using the `gpt-5.3-codex` rate as a deliberate stand-in — see `_substitutions` in the
-file. Add more as USD per-million-token rates:
+`gpt-5.1-codex`, plus Gemini rates for `gemini-3.1-pro-preview`, `gemini-2.5-pro`,
+`gemini-3.6-flash` and `gemini-3.5-flash-lite`. Note that `gpt-5.1-codex` is not published on
+OpenAI's pricing page and is priced using the `gpt-5.3-codex` rate as a deliberate stand-in —
+see `_substitutions` in the file. Add more as USD per-million-token rates:
 
 ```json
 {"gpt-5-mini": {"input_per_1m": 0.25, "output_per_1m": 2.00}}
@@ -150,6 +151,12 @@ file. Add more as USD per-million-token rates:
 
 Local providers (`custom`/`ollama`) always count as free. Models with no pricing entry report
 cost as `—` (unknown) rather than `$0.00`, so an unpriced model is never mistaken for a free one.
+
+Two pricing shapes beyond a flat rate are supported. `long_context`
+`{above_input_tokens, input_per_1m, output_per_1m}` applies a higher tier to prompts over the
+threshold — Gemini Pro models roughly double above 200k input tokens, which PAL hits regularly
+when sending large file contexts. `rate_change` `{from: "YYYY-MM-DD", ...}` takes effect on that
+date, so an announced price change does not silently keep reporting the old rate.
 
 Lookup is by exact model ID, falling back to a prefix match **only** for pinned snapshots
 (`-2026-01-15`, `-20260115`, `-latest`). Sibling models are deliberately *not* matched: IDs in a

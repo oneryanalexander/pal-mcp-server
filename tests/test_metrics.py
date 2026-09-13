@@ -1,6 +1,7 @@
 """Tests for utilisation metrics recording and cost estimation."""
 
 import sqlite3
+import time
 
 import pytest
 
@@ -15,6 +16,34 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("PAL_METRICS_DB", str(tmp_path / "m.db"))
     monkeypatch.setattr(metrics, "_initialised", False)
     yield tmp_path / "m.db"
+
+
+@pytest.fixture(autouse=True)
+def pricing(monkeypatch):
+    """A fixed pricing table covering every supported entry shape."""
+    monkeypatch.setattr(
+        metrics,
+        "_PRICING_CACHE",
+        {
+            "gpt-5": {"input_per_1m": 1.25, "output_per_1m": 10.00},
+            "gpt-5-mini": {"input_per_1m": 0.25, "output_per_1m": 2.00},
+            "gpt-5.2": {"input_per_1m": 1.75, "output_per_1m": 14.00},
+            "tiered-pro": {
+                "input_per_1m": 1.25,
+                "output_per_1m": 10.00,
+                "long_context": {
+                    "above_input_tokens": 200_000,
+                    "input_per_1m": 2.50,
+                    "output_per_1m": 15.00,
+                },
+            },
+            "scheduled-flash": {
+                "input_per_1m": 0.75,
+                "output_per_1m": 3.75,
+                "rate_change": {"from": "2027-01-01", "input_per_1m": 1.50, "output_per_1m": 7.50},
+            },
+        },
+    )
 
 
 def rows(db_path, table):
@@ -61,12 +90,7 @@ class TestRecording:
     def test_no_context_is_a_noop(self, db):
         """Provider use outside a tracked call must not write rows."""
         ModelResponse(content="x", usage={"total_tokens": 999}, model_name="orphan")
-        conn = sqlite3.connect(str(db))
-        try:
-            tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")]
-        finally:
-            conn.close()
-        assert not tables or not rows(db, "model_calls")
+        assert not db.exists()
 
     def test_disabled_records_nothing(self, db, monkeypatch):
         monkeypatch.setenv("PAL_METRICS_ENABLED", "false")
@@ -76,18 +100,6 @@ class TestRecording:
 
 
 class TestCostEstimation:
-    @pytest.fixture(autouse=True)
-    def pricing(self, monkeypatch):
-        monkeypatch.setattr(
-            metrics,
-            "_PRICING_CACHE",
-            {
-                "gpt-5": {"input_per_1m": 1.25, "output_per_1m": 10.00},
-                "gpt-5-mini": {"input_per_1m": 0.25, "output_per_1m": 2.00},
-                "gpt-5.2": {"input_per_1m": 1.75, "output_per_1m": 14.00},
-            },
-        )
-
     def test_exact_match(self):
         assert metrics.estimate_cost("gpt-5-mini", "openai", 1_000_000, 1_000_000) == pytest.approx(2.25)
 
@@ -98,25 +110,15 @@ class TestCostEstimation:
         """Unknown pricing must be distinguishable from genuinely free."""
         assert metrics.estimate_cost("mystery-model", "openai", 1000, 1000) is None
 
-    @pytest.mark.parametrize(
-        "model",
-        [
-            "gpt-5-mini",  # must NOT fall back to the shorter "gpt-5" key
-            "gpt-5.2",  # must NOT fall back to "gpt-5"
-        ],
-    )
+    @pytest.mark.parametrize("model", ["gpt-5-mini", "gpt-5.2"])
     def test_longest_key_wins(self, model):
+        """Neither may fall back to the shorter 'gpt-5' key."""
         exact = metrics._pricing()[model]["input_per_1m"]
         assert metrics.estimate_cost(model, "openai", 1_000_000, 0) == pytest.approx(exact)
 
     @pytest.mark.parametrize(
         "model",
-        [
-            "gpt-5-codex",  # a different model, not a gpt-5 snapshot
-            "gpt-5.1-codex",
-            "gpt-5.2-pro",  # a pro tier, priced far above gpt-5.2
-            "gpt-5-turbo",
-        ],
+        ["gpt-5-codex", "gpt-5.1-codex", "gpt-5.2-pro", "gpt-5-turbo"],
     )
     def test_sibling_models_do_not_borrow_prices(self, model):
         """Sharing a prefix is not sharing a price tier."""
@@ -128,3 +130,48 @@ class TestCostEstimation:
     )
     def test_dated_snapshots_resolve(self, model):
         assert metrics.estimate_cost(model, "openai", 1_000_000, 0) == pytest.approx(0.25)
+
+
+class TestTieredPricing:
+    """Long prompts move a completion to the published higher tier."""
+
+    def test_below_threshold_uses_base_rate(self):
+        cost = metrics.estimate_cost("tiered-pro", "google", 100_000, 10_000)
+        assert cost == pytest.approx(100_000 / 1e6 * 1.25 + 10_000 / 1e6 * 10.00)
+
+    def test_at_threshold_still_base_rate(self):
+        """The tier applies above the threshold, not at it."""
+        cost = metrics.estimate_cost("tiered-pro", "google", 200_000, 0)
+        assert cost == pytest.approx(200_000 / 1e6 * 1.25)
+
+    def test_above_threshold_uses_long_rate(self):
+        cost = metrics.estimate_cost("tiered-pro", "google", 300_000, 10_000)
+        assert cost == pytest.approx(300_000 / 1e6 * 2.50 + 10_000 / 1e6 * 15.00)
+
+    def test_flat_model_ignores_tiering(self):
+        cost = metrics.estimate_cost("gpt-5-mini", "openai", 5_000_000, 0)
+        assert cost == pytest.approx(5_000_000 / 1e6 * 0.25)
+
+
+class TestScheduledRateChange:
+    BEFORE = time.mktime(time.strptime("2026-12-31", "%Y-%m-%d"))
+    AFTER = time.mktime(time.strptime("2027-02-01", "%Y-%m-%d"))
+
+    def test_before_change_uses_current_rate(self):
+        cost = metrics.estimate_cost("scheduled-flash", "google", 1_000_000, 1_000_000, at=self.BEFORE)
+        assert cost == pytest.approx(0.75 + 3.75)
+
+    def test_after_change_uses_new_rate(self):
+        cost = metrics.estimate_cost("scheduled-flash", "google", 1_000_000, 1_000_000, at=self.AFTER)
+        assert cost == pytest.approx(1.50 + 7.50)
+
+    def test_model_without_schedule_is_unaffected(self):
+        assert metrics.estimate_cost("gpt-5-mini", "openai", 1_000_000, 0, at=self.AFTER) == pytest.approx(0.25)
+
+    def test_malformed_schedule_falls_back_to_base(self, monkeypatch):
+        monkeypatch.setattr(
+            metrics,
+            "_PRICING_CACHE",
+            {"broken": {"input_per_1m": 1.0, "output_per_1m": 1.0, "rate_change": {"from": "not-a-date"}}},
+        )
+        assert metrics.estimate_cost("broken", "google", 1_000_000, 0) == pytest.approx(1.0)

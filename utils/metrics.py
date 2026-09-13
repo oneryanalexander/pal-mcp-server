@@ -137,8 +137,41 @@ _FREE_PROVIDERS = {"custom", "local", "ollama"}
 _SNAPSHOT_SUFFIX = re.compile(r"|-\d{4}-\d{2}-\d{2}|-\d{6,8}|-latest")
 
 
-def estimate_cost(model: str, provider: str, input_tokens: int, output_tokens: int) -> float | None:
-    """Return the USD cost of a completion, or None when pricing is unknown."""
+def _apply_schedule(entry: dict, at: float | None) -> dict:
+    """Swap in a scheduled future rate once its start date has passed.
+
+    Published prices sometimes carry an announced change date. Honouring it
+    keeps costs correct after the switchover instead of silently reporting
+    the old, lower rate.
+    """
+    change = entry.get("rate_change")
+    if not isinstance(change, dict) or not change.get("from"):
+        return entry
+    try:
+        starts = time.mktime(time.strptime(change["from"], "%Y-%m-%d"))
+    except (ValueError, TypeError):
+        return entry
+    now = time.time() if at is None else at
+    if now < starts:
+        return entry
+    merged = dict(entry)
+    merged.update({k: v for k, v in change.items() if k != "from"})
+    return merged
+
+
+def estimate_cost(
+    model: str,
+    provider: str,
+    input_tokens: int,
+    output_tokens: int,
+    at: float | None = None,
+) -> float | None:
+    """Return the USD cost of a completion, or None when pricing is unknown.
+
+    Handles two published pricing shapes beyond a flat rate: a long-context
+    tier that applies above a prompt-size threshold, and a rate change
+    scheduled from a given date. `at` overrides "now" for the latter.
+    """
     if (provider or "").lower() in _FREE_PROVIDERS:
         return 0.0
     table = _pricing()
@@ -165,6 +198,16 @@ def estimate_cost(model: str, provider: str, input_tokens: int, output_tokens: i
             entry = table[best_key]
     if entry is None:
         return None
+
+    entry = _apply_schedule(entry, at)
+
+    # A long prompt can move the whole completion to a higher tier.
+    long_ctx = entry.get("long_context")
+    if isinstance(long_ctx, dict):
+        threshold = long_ctx.get("above_input_tokens")
+        if threshold is not None and input_tokens > threshold:
+            entry = {**entry, **{k: v for k, v in long_ctx.items() if k != "above_input_tokens"}}
+
     per_m_in = entry.get("input_per_1m")
     per_m_out = entry.get("output_per_1m")
     if per_m_in is None and per_m_out is None:

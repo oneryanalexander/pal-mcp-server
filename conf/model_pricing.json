@@ -1,7 +1,12 @@
 {
-  "_comment": "USD per 1M tokens for standard (non-cached, non-batch) API usage. Keys are canonical model IDs as recorded in metrics. Lookup is exact, falling back to a prefix match only for pinned snapshots (-2026-01-15, -latest). Models absent from this file report cost as unknown (—) rather than $0.00. Local providers (custom/ollama) always count as free.",
-  "_source": "OpenAI standard pricing, https://developers.openai.com/api/docs/pricing?latest-pricing=standard (retrieved 2026-09-13)",
-  "_substitutions": "gpt-5.1-codex is not listed on the source page; it is priced here using the published gpt-5.3-codex rate as a deliberate stand-in. Revisit if OpenAI publishes a gpt-5.1-codex rate.",
+  "_comment": "USD per 1M tokens for standard paid-tier API usage. Keys are canonical model IDs as recorded in metrics. Lookup is exact, falling back to a prefix match only for pinned snapshots (-2026-01-15, -latest). Models absent from this file report cost as unknown (—) rather than $0.00. Local providers (custom/ollama) always count as free.",
+  "_schema": "Each entry takes input_per_1m and output_per_1m. Optional 'long_context' {above_input_tokens, input_per_1m, output_per_1m} applies a higher tier to prompts over the threshold. Optional 'rate_change' {from: YYYY-MM-DD, ...} takes effect on that date.",
+  "_sources": [
+    "OpenAI standard pricing, https://developers.openai.com/api/docs/pricing?latest-pricing=standard (retrieved 2026-09-13)",
+    "Gemini API pricing, https://ai.google.dev/gemini-api/docs/pricing (retrieved 2026-09-13)"
+  ],
+  "_substitutions": "gpt-5.1-codex is not listed on the OpenAI pricing page; it is priced here using the published gpt-5.3-codex rate as a deliberate stand-in. Revisit if OpenAI publishes a gpt-5.1-codex rate.",
+  "_notes": "Gemini audio-input surcharges are not modelled; PAL sends text, so the text rate applies.",
 
   "gpt-5": { "input_per_1m": 1.25, "output_per_1m": 10.00 },
   "gpt-5-mini": { "input_per_1m": 0.25, "output_per_1m": 2.00 },
@@ -9,6 +14,22 @@
   "gpt-5.2": { "input_per_1m": 1.75, "output_per_1m": 14.00 },
   "gpt-4.1": { "input_per_1m": 2.00, "output_per_1m": 8.00 },
   "o3-mini": { "input_per_1m": 1.10, "output_per_1m": 4.40 },
+  "gpt-5.1-codex": { "input_per_1m": 1.75, "output_per_1m": 14.00 },
 
-  "gpt-5.1-codex": { "input_per_1m": 1.75, "output_per_1m": 14.00 }
+  "gemini-3.1-pro-preview": {
+    "input_per_1m": 2.00,
+    "output_per_1m": 12.00,
+    "long_context": { "above_input_tokens": 200000, "input_per_1m": 4.00, "output_per_1m": 18.00 }
+  },
+  "gemini-2.5-pro": {
+    "input_per_1m": 1.25,
+    "output_per_1m": 10.00,
+    "long_context": { "above_input_tokens": 200000, "input_per_1m": 2.50, "output_per_1m": 15.00 }
+  },
+  "gemini-3.6-flash": {
+    "input_per_1m": 0.75,
+    "output_per_1m": 3.75,
+    "rate_change": { "from": "2027-01-01", "input_per_1m": 1.50, "output_per_1m": 7.50 }
+  },
+  "gemini-3.5-flash-lite": { "input_per_1m": 0.30, "output_per_1m": 2.50 }
 }
