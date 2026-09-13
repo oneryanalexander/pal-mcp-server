@@ -199,10 +199,12 @@ class TestAutoModeCustomProviderOnly:
                 fallback_model = ModelProviderRegistry.get_preferred_fallback_model(ToolModelCategory.FAST_RESPONSE)
                 print(f"Fallback model for FAST_RESPONSE: {fallback_model}")
 
-                # Should get a valid model name, not the hardcoded fallback
+                # The fallback must come from the custom provider's own catalogue, not the
+                # registry's hardcoded Gemini default (which would pass a plain inequality check).
+                custom_models = ModelProviderRegistry.get_available_models(respect_restrictions=False)
                 assert (
-                    fallback_model != "gemini-2.5-flash"
-                ), "Should not fallback to hardcoded Gemini model when custom provider is available"
+                    custom_models.get(fallback_model) == ProviderType.CUSTOM
+                ), f"Fallback '{fallback_model}' should be a custom-provider model when only the custom provider is available"
 
             except Exception as e:
                 pytest.fail(f"Getting fallback model failed: {e}")

@@ -71,7 +71,9 @@ Consult the JSON file for the full list, aliases, and capability flags. Add new 
 
 | Alias | Maps to Local Model | Note |
 |-------|-------------------|------|
-| `local-llama`, `local` | `llama3.2` | Requires `CUSTOM_API_URL` configured |
+| `coder`, `qwen-coder`, `primary-coder` | `qwen2.5-coder:32b` | Requires `CUSTOM_API_URL` configured |
+| `debugger`, `deepseek` | `deepseek-coder-v2:16b` | Requires `CUSTOM_API_URL` configured |
+| `fast`, `quick-coder` | `qwen2.5-coder:7b` | Requires `CUSTOM_API_URL` configured |
 
 View the baseline OpenRouter catalogue in [`conf/openrouter_models.json`](conf/openrouter_models.json) and populate [`conf/custom_models.json`](conf/custom_models.json) with your local models.
 
@@ -129,7 +131,7 @@ For local models like Ollama, vLLM, LM Studio, or any OpenAI-compatible API:
 ```bash
 # Example: Ollama
 ollama serve
-ollama pull llama3.2
+ollama pull qwen2.5-coder:32b
 
 # Example: vLLM
 python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b-chat-hf
@@ -143,7 +145,7 @@ python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b-chat-
 # Add to your .env file
 CUSTOM_API_URL=http://localhost:11434/v1  # Ollama example
 CUSTOM_API_KEY=                                      # Empty for Ollama (no auth needed)
-CUSTOM_MODEL_NAME=llama3.2                          # Default model to use
+CUSTOM_MODEL_NAME=qwen2.5-coder:32b                 # Default model to use
 ```
 
 **Local Model Connection**
@@ -161,7 +163,7 @@ CUSTOM_API_URL=http://localhost:11434/v1  # Ollama default port
 ```bash
 CUSTOM_API_URL=http://localhost:11434/v1
 CUSTOM_API_KEY=
-CUSTOM_MODEL_NAME=llama3.2
+CUSTOM_MODEL_NAME=qwen2.5-coder:32b
 ```
 
 **vLLM:**
@@ -197,8 +199,8 @@ CUSTOM_MODEL_NAME=your-loaded-model
 "Use mistral via pal to optimize"    # → mistral/mistral-large
 
 # Local models (with custom URL configured):
-"Use local-llama to analyze this code"     # → llama3.2 (local)
-"Use local to debug this function"         # → llama3.2 (local)
+"Use coder to analyze this code"           # → qwen2.5-coder:32b (local)
+"Use fast to debug this function"          # → qwen2.5-coder:7b (local)
 ```
 
 **Using full model names:**
@@ -209,7 +211,7 @@ CUSTOM_MODEL_NAME=your-loaded-model
 "Use deepseek/deepseek-coder via pal to generate code"
 
 # Local/custom models:
-"Use llama3.2 via pal to review this"
+"Use qwen2.5-coder:32b via pal to review this"
 "Use meta-llama/Llama-2-7b-chat-hf via pal to analyze"
 ```
 
@@ -272,7 +274,7 @@ Edit `conf/openrouter_models.json` to tweak OpenRouter behaviour or `conf/custom
 ```
 
 **Field explanations:**
-- `model_name`: The model identifier (OpenRouter format like `vendor/model` or local name like `llama3.2`)
+- `model_name`: The model identifier (OpenRouter format like `vendor/model` or local name like `qwen2.5-coder:32b`)
 - `aliases`: Array of short names users can type instead of the full model name
 - `context_window`: Total tokens the model can process (input + output combined)
 - `supports_extended_thinking`: Whether the model has extended reasoning capabilities

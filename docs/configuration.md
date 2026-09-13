@@ -52,7 +52,7 @@ OPENROUTER_API_KEY=your_openrouter_api_key_here
 # For Ollama, vLLM, LM Studio, etc.
 CUSTOM_API_URL=http://localhost:11434/v1  # Ollama example
 CUSTOM_API_KEY=                                      # Empty for Ollama
-CUSTOM_MODEL_NAME=llama3.2                          # Default model
+CUSTOM_MODEL_NAME=qwen2.5-coder:32b                 # Default model
 ```
 
 **Local Model Connection:**
@@ -82,10 +82,10 @@ DEFAULT_MODEL=auto  # Claude picks best model for each task (recommended)
   | Provider | Canonical Models | Notable Aliases |
   |----------|-----------------|-----------------|
   | OpenAI | `gpt-5.2`, `gpt-5.1-codex`, `gpt-5.1-codex-mini`, `gpt-5`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5-codex`, `gpt-4.1`, `o3`, `o3-mini`, `o3-pro`, `o4-mini` | `gpt5.2`, `gpt-5.2`, `5.2`, `gpt5.1-codex`, `codex-5.1`, `codex-mini`, `gpt5`, `gpt5pro`, `mini`, `nano`, `codex`, `o3mini`, `o3pro`, `o4mini` |
-  | Gemini | `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-2.0-flash-lite` | `pro`, `gemini-pro`, `flash`, `flash-2.0`, `flashlite` |
+  | Gemini | `gemini-3.1-pro-preview`, `gemini-2.5-pro`, `gemini-3.6-flash`, `gemini-3.5-flash-lite` | `pro`, `gemini-pro`, `gemini3`, `flash`, `flash2.5`, `flashlite`, `flash-lite` |
   | X.AI | `grok-4`, `grok-4.1-fast` | `grok`, `grok4`, `grok-4.1-fast-reasoning` |
   | OpenRouter | See `conf/openrouter_models.json` for the continually evolving catalogue | e.g., `opus`, `sonnet`, `flash`, `pro`, `mistral` |
-  | Custom | User-managed entries such as `llama3.2` | Define your own aliases per entry |
+  | Custom | User-managed entries such as `qwen2.5-coder:32b` | Define your own aliases per entry (e.g. `coder`, `fast`) |
 
   Latest OpenAI entries (`gpt-5.2`, `gpt-5.1-codex`, `gpt-5.1-codex-mini`, `gpt-5.2-pro`) expose 400K-token contexts with large outputs, reasoning-token support, and multimodal inputs. `gpt-5.1-codex` and `gpt-5.2-pro` are Responses-only with streaming disabled, while the base `gpt-5.2` and Codex mini support streaming along with full code-generation flags. Update your manifests if you run custom deployments so these capability bits stay accurate.
 
@@ -187,7 +187,7 @@ OPENROUTER_ALLOWED_MODELS=opus,sonnet,mistral
 
 **Supported Model Names:** The names/aliases listed in the JSON manifests above are the authoritative source. Keep in mind:
 
-- Aliases are case-insensitive and defined per entry (for example, `mini` maps to `gpt-5-mini` by default, while `flash` maps to `gemini-2.5-flash`).
+- Aliases are case-insensitive and defined per entry (for example, `mini` maps to `gpt-5-mini` by default, while `flash` maps to `gemini-3.6-flash`).
 - When you override the manifest files you can add or remove aliases as needed; restriction policies (`*_ALLOWED_MODELS`) automatically pick up those changes.
 - Models omitted from a manifest fall back to generic capability detection (where supported) and may have limited feature metadata.
 
@@ -271,10 +271,10 @@ CONVERSATION_TIMEOUT_HOURS=3
 ### Local Development
 ```env
 # Local models only
-DEFAULT_MODEL=llama3.2
+DEFAULT_MODEL=qwen2.5-coder:32b
 CUSTOM_API_URL=http://localhost:11434/v1
 CUSTOM_API_KEY=
-CUSTOM_MODEL_NAME=llama3.2
+CUSTOM_MODEL_NAME=qwen2.5-coder:32b
 LOG_LEVEL=DEBUG
 ```
 
