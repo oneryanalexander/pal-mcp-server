@@ -10,11 +10,13 @@
 
   "gpt-5": { "input_per_1m": 1.25, "output_per_1m": 10.00 },
   "gpt-5-mini": { "input_per_1m": 0.25, "output_per_1m": 2.00 },
+  "gpt-5.4-mini": { "input_per_1m": 0.75, "output_per_1m": 4.50 },
   "gpt-5-nano": { "input_per_1m": 0.05, "output_per_1m": 0.40 },
   "gpt-5.2": { "input_per_1m": 1.75, "output_per_1m": 14.00 },
   "gpt-4.1": { "input_per_1m": 2.00, "output_per_1m": 8.00 },
   "o3-mini": { "input_per_1m": 1.10, "output_per_1m": 4.40 },
   "gpt-5.1-codex": { "input_per_1m": 1.75, "output_per_1m": 14.00 },
+  "gpt-5.3-codex": { "input_per_1m": 1.75, "output_per_1m": 14.00 },
 
   "gemini-3.1-pro-preview": {
     "input_per_1m": 2.00,
@@ -25,6 +27,11 @@
     "input_per_1m": 1.25,
     "output_per_1m": 10.00,
     "long_context": { "above_input_tokens": 200000, "input_per_1m": 2.50, "output_per_1m": 15.00 }
+  },
+  "gemini-3.8-flash": {
+    "input_per_1m": 0.75,
+    "output_per_1m": 3.75,
+    "rate_change": { "from": "2027-01-01", "input_per_1m": 1.50, "output_per_1m": 7.50 }
   },
   "gemini-3.6-flash": {
     "input_per_1m": 0.75,

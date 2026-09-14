@@ -11,7 +11,7 @@
         "CUSTOM_MODEL_NAME": "qwen2.5-coder:32b",
         "DEFAULT_MODEL": "qwen2.5-coder:32b",
         "LOG_LEVEL": "DEBUG",
-        "OPENAI_ALLOWED_MODELS": "gpt-5.1-codex,gpt-5-mini",
+        "OPENAI_ALLOWED_MODELS": "gpt-5.3-codex,gpt-5.4-mini",
         "GOOGLE_ALLOWED_MODELS": "pro,flash"
       }
     }

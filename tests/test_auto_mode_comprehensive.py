@@ -81,8 +81,8 @@ class TestAutoModeComprehensive:
                 },
                 {
                     "EXTENDED_REASONING": "gemini-3.1-pro-preview",  # Gemini 3 Pro Preview for deep thinking
-                    "FAST_RESPONSE": "gemini-3.6-flash",  # Flash for speed
-                    "BALANCED": "gemini-3.6-flash",  # Flash as balanced
+                    "FAST_RESPONSE": "gemini-3.8-flash",  # Flash for speed
+                    "BALANCED": "gemini-3.8-flash",  # Flash as balanced
                 },
             ),
             # Only OpenAI API available
@@ -94,8 +94,8 @@ class TestAutoModeComprehensive:
                     "OPENROUTER_API_KEY": None,
                 },
                 {
-                    "EXTENDED_REASONING": "gpt-5.1-codex",  # GPT-5.1 Codex prioritized for coding tasks
-                    "FAST_RESPONSE": "gpt-5.2",  # Prefer gpt-5.2 for speed
+                    "EXTENDED_REASONING": "gpt-5.3-codex",  # newest Codex prioritized for coding tasks
+                    "FAST_RESPONSE": "gpt-5.4-mini",  # newest mini for fast, cheap responses
                     "BALANCED": "gpt-5.2",  # Prefer gpt-5.2 for balanced
                 },
             ),
@@ -123,8 +123,8 @@ class TestAutoModeComprehensive:
                 },
                 {
                     "EXTENDED_REASONING": "gemini-3.1-pro-preview",  # Gemini 3 Pro Preview comes first in priority
-                    "FAST_RESPONSE": "gemini-3.6-flash",  # Prefer flash for speed
-                    "BALANCED": "gemini-3.6-flash",  # Prefer flash for balanced
+                    "FAST_RESPONSE": "gemini-3.8-flash",  # Prefer flash for speed
+                    "BALANCED": "gemini-3.8-flash",  # Prefer flash for balanced
                 },
             ),
             # All native APIs available - Google still comes first
@@ -137,8 +137,8 @@ class TestAutoModeComprehensive:
                 },
                 {
                     "EXTENDED_REASONING": "gemini-3.1-pro-preview",  # Gemini 3 Pro Preview comes first in priority
-                    "FAST_RESPONSE": "gemini-3.6-flash",  # Prefer flash for speed
-                    "BALANCED": "gemini-3.6-flash",  # Prefer flash for balanced
+                    "FAST_RESPONSE": "gemini-3.8-flash",  # Prefer flash for speed
+                    "BALANCED": "gemini-3.8-flash",  # Prefer flash for balanced
                 },
             ),
         ],
@@ -441,7 +441,7 @@ class TestAutoModeComprehensive:
             assert "o3-mini" not in available_models
 
             # Should still include all Gemini models (no restrictions)
-            assert "gemini-3.6-flash" in available_models
+            assert "gemini-3.8-flash" in available_models
             assert "gemini-2.5-pro" in available_models
 
     def test_openrouter_fallback_when_no_native_apis(self):
@@ -476,7 +476,7 @@ class TestAutoModeComprehensive:
             # Mock OpenRouter registry to return known models
             mock_registry = MagicMock()
             mock_registry.list_models.return_value = [
-                "google/gemini-3.6-flash",
+                "google/gemini-3.8-flash",
                 "google/gemini-2.5-pro",
                 "openai/o3",
                 "openai/o4-mini",
@@ -527,10 +527,10 @@ class TestAutoModeComprehensive:
             mock_provider = MagicMock()
             mock_response = MagicMock()
             mock_response.content = "test response"
-            mock_response.model_name = "gemini-3.6-flash"  # The resolved name
+            mock_response.model_name = "gemini-3.8-flash"  # The resolved name
             mock_response.usage = {"input_tokens": 10, "output_tokens": 5}
             # Mock _resolve_model_name to simulate alias resolution
-            mock_provider._resolve_model_name = lambda alias: ("gemini-3.6-flash" if alias == "flash" else alias)
+            mock_provider._resolve_model_name = lambda alias: ("gemini-3.8-flash" if alias == "flash" else alias)
             mock_provider.generate_content.return_value = mock_response
 
             with patch.object(ModelProviderRegistry, "get_provider_for_model", return_value=mock_provider):

@@ -139,9 +139,9 @@ call may produce several `model_calls` rows, which is how multi-model tools like
 are attributed correctly.
 
 **Cost estimation** is driven by `conf/model_pricing.json`, pre-filled with OpenAI standard
-rates for `gpt-5`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5.2`, `gpt-4.1`, `o3-mini` and
-`gpt-5.1-codex`, plus Gemini rates for `gemini-3.1-pro-preview`, `gemini-2.5-pro`,
-`gemini-3.6-flash` and `gemini-3.5-flash-lite`. Note that `gpt-5.1-codex` is not published on
+rates for `gpt-5`, `gpt-5-mini`, `gpt-5.4-mini`, `gpt-5-nano`, `gpt-5.2`, `gpt-4.1`, `o3-mini`,
+`gpt-5.1-codex` and `gpt-5.3-codex`, plus Gemini rates for `gemini-3.1-pro-preview`, `gemini-2.5-pro`,
+`gemini-3.8-flash`, `gemini-3.6-flash` and `gemini-3.5-flash-lite`. Note that `gpt-5.1-codex` is not published on
 OpenAI's pricing page and is priced using the `gpt-5.3-codex` rate as a deliberate stand-in —
 see `_substitutions` in the file. Add more as USD per-million-token rates:
 
