@@ -13,6 +13,7 @@ from utils import metrics
 @pytest.fixture
 def db(tmp_path, monkeypatch):
     """Point metrics at a throwaway database."""
+    monkeypatch.setenv("PAL_METRICS_ENABLED", "true")  # conftest disables recording globally
     monkeypatch.setenv("PAL_METRICS_DB", str(tmp_path / "m.db"))
     monkeypatch.setattr(metrics, "_initialised", False)
     yield tmp_path / "m.db"

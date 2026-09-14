@@ -32,6 +32,10 @@ env_config.reload_env({"PAL_MCP_FORCE_ENV_OVERRIDE": "false"})
 # This prevents all tests from failing due to missing model parameter
 os.environ["DEFAULT_MODEL"] = "gemini-3.6-flash"
 
+# Keep unit runs out of the production utilisation database (logs/metrics.db).
+# tests/test_metrics.py re-enables recording against a throwaway file.
+os.environ["PAL_METRICS_ENABLED"] = "false"
+
 # Force reload of config module to pick up the env var
 import config  # noqa: E402
 
