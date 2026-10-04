@@ -1764,7 +1764,8 @@ function Test-QwenCliIntegration {
                     $cwdMatches = ([string]::IsNullOrEmpty($cwdValue) -or $cwdValue -eq $scriptDir)
 
                     if ($commandMatches -and $argsMatches -and $cwdMatches) {
-                        $configStatus = $legacyRemoved ? "cleanup" : "match"
+                        # if/else rather than ?: so the script still parses on Windows PowerShell 5.1
+                        $configStatus = if ($legacyRemoved) { "cleanup" } else { "match" }
                     }
                     else {
                         $configStatus = "mismatch"
